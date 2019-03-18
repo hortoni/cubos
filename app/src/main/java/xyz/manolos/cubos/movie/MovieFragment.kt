@@ -50,14 +50,14 @@ class MovieFragment : Fragment(), MovieView {
 
         fragmentPresenter.fetchMovies(page, genreId)
 
-        fragmentPresenter.observeMoviesByGenreId(genreId).observe(this, Observer {
+        fragmentPresenter.observeMoviesByGenreId(genreId).observe(viewLifecycleOwner, Observer {
             adapter.submitList(it)
-            moviesList.smoothScrollToPosition(0)
         })
 
         swipeLayout.setOnRefreshListener {
             fragmentPresenter.fetchMovies(page, genreId)
         }
+
     }
 
     private fun setupRecyclerview(context: Context) {
@@ -96,6 +96,11 @@ class MovieFragment : Fragment(), MovieView {
 
     override fun hideLoading() {
         swipeLayout.isRefreshing = false
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        fragmentPresenter.observeMoviesByGenreId(genreId).removeObservers(this)
     }
 
 }

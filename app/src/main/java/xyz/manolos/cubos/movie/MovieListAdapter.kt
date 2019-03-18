@@ -10,6 +10,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.movie_list_item.view.*
 import xyz.manolos.cubos.R
 import xyz.manolos.cubos.model.Movie
+import xyz.manolos.cubos.detail.DetailActivity
 
 
 private const val IMAGE_URL = "https://image.tmdb.org/t/p/w500/%s"
@@ -34,6 +35,7 @@ class MovieListAdapter(private val context: Context) : ListAdapter<Movie, MovieL
         val movie = getItem(position)
         holder.bindView(movie)
         holder.itemView.setOnClickListener {
+            context.startActivity(DetailActivity.newIntent(context, movie))
         }
 
     }

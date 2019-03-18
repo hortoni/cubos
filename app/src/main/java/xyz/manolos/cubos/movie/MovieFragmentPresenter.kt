@@ -72,4 +72,6 @@ class MovieFragmentPresenter @Inject constructor(
         view.showError()
         view.hideLoading()
     }
+
+
 }

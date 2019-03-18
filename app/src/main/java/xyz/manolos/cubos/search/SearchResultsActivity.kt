@@ -149,7 +149,7 @@ class SearchResultsActivity : AppCompatActivity(), SearchResultsView{
         swipeSearchResultsLayout.isRefreshing = false
     }
 
-    fun getListFromLists(list1: List<Movie>, list2: List<Movie>) : List<Movie> {
+    private fun getListFromLists(list1: List<Movie>, list2: List<Movie>) : List<Movie> {
         val list = ArrayList<Movie>()
         list.addAll(list1)
         list.addAll(list2)
