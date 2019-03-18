@@ -11,16 +11,16 @@ class MoviePagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
         val bundle = Bundle()
         when (position) {
             0 -> {
-                bundle.putInt("id", 28)
+                bundle.putLong("id", 28)
             }
             1 -> {
-                bundle.putInt("id", 18)
+                bundle.putLong("id", 18)
             }
             2 -> {
-                bundle.putInt("id", 14)
+                bundle.putLong("id", 14)
             }
             else -> {
-                bundle.putInt("id", 878)
+                bundle.putLong("id", 878)
             }
         }
         fragment.arguments = bundle

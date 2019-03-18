@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.movie_fragment.*
@@ -23,14 +24,14 @@ interface MovieView {
     fun hideLoading()
 }
 
-class MovieFragment: Fragment(), MovieView {
+class MovieFragment : Fragment(), MovieView {
 
     @Inject
     lateinit var presenter: MoviePresenter
     private lateinit var linearLayoutManager: GridLayoutManager
     private lateinit var adapter: MovieListAdapter
     private var page: Int = 1
-    private var genreId = 0
+    private var genreId: Long = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity!!.injector
@@ -42,12 +43,22 @@ class MovieFragment: Fragment(), MovieView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupRecyclerview(this.context!!)
-        genreId = this.arguments!!.getInt("id")
-        presenter.fetchMovies(1, genreId)
+        genreId = this.arguments!!.getLong("id")
+        presenter.fetchMovies(page, genreId)
+
+        presenter.fetchMovies(page, genreId)
+
+        presenter.observeMoviesByGenreId(genreId).observe(this, Observer {
+            adapter.submitList(it)
+        })
+
+        swipeLayout.setOnRefreshListener {
+            presenter.fetchMovies(page, genreId)
+        }
     }
 
     private fun setupRecyclerview(context: Context) {
-        linearLayoutManager = GridLayoutManager(context,2)
+        linearLayoutManager = GridLayoutManager(context, 2)
         moviesList.layoutManager = linearLayoutManager
         adapter = MovieListAdapter(context)
         moviesList.adapter = adapter
@@ -56,9 +67,8 @@ class MovieFragment: Fragment(), MovieView {
                 val total = linearLayoutManager.itemCount
                 val lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
                 val isNearEnd = total - 1 == lastVisibleItem
-                if (isNearEnd && !swipeLayout.isRefreshing && page != -1)  {
+                if (isNearEnd && !swipeLayout.isRefreshing && page != -1) {
                     presenter.fetchMovies(page, genreId)
-
                 }
             }
         })
@@ -70,7 +80,7 @@ class MovieFragment: Fragment(), MovieView {
         if (it.totalPages == page) {
             page = -1
         } else {
-            page ++
+            page++
         }
     }
 
