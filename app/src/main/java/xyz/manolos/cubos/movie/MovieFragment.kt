@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.movie_fragment.*
 import xyz.manolos.cubos.R
 import xyz.manolos.cubos.injector
@@ -32,6 +33,8 @@ class MovieFragment : Fragment(), MovieView {
     private lateinit var adapter: MovieListAdapter
     private var page: Int = 1
     private var genreId: Long = 0
+    private lateinit var disposable: Disposable
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity!!.injector
@@ -44,7 +47,6 @@ class MovieFragment : Fragment(), MovieView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupRecyclerview(this.context!!)
         genreId = this.arguments!!.getLong("id")
-        presenter.fetchMovies(page, genreId)
 
         presenter.fetchMovies(page, genreId)
 

@@ -5,4 +5,5 @@
     <string name="fantasia">Fantasia</string>
     <string name="ficcao">Ficção</string>
     <string name="error">Sem conexão com a internet.</string>
+    <string name="search_title">Buscar</string>
 </resources>
