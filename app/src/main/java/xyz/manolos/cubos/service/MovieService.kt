@@ -10,4 +10,8 @@ interface MovieService {
 
     @GET("discover/movie")
     fun fetchMoviesByGenreId(@Query("page") page: Int, @Query("with_genres") genreId: Long): Single<ResponseMovies>
+
+    @GET("search/movie")
+    fun fetchMoviesByQuery(@Query("page") page: Int, @Query("query") query: String): Single<ResponseMovies>
+
 }

@@ -14,7 +14,7 @@ import xyz.manolos.cubos.model.ResponseMovies
 import xyz.manolos.cubos.service.MovieService
 import javax.inject.Inject
 
-class MoviePresenter @Inject constructor(
+class MovieFragmentPresenter @Inject constructor(
     private val view: MovieView,
     private val movieService: MovieService,
     private val movieDao: MovieDao,

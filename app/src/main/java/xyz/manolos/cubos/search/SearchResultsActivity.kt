@@ -1,61 +1,72 @@
-package xyz.manolos.cubos.movie
+package xyz.manolos.cubos.search
 
+import android.app.SearchManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.Menu
+import android.widget.SearchView
 import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.movie_fragment.*
 import xyz.manolos.cubos.R
 import xyz.manolos.cubos.injector
 import xyz.manolos.cubos.model.ResponseMovies
+import xyz.manolos.cubos.movie.MovieListAdapter
 import javax.inject.Inject
 
 
-interface MovieView {
+interface SearchResultsView {
     fun updatePage(it: ResponseMovies)
     fun showError()
     fun showLoading()
     fun hideLoading()
 }
 
-class MovieFragment : Fragment(), MovieView {
+class SearchResultsActivity : AppCompatActivity(), SearchResultsView{
 
     @Inject
-    lateinit var fragmentPresenter: MovieFragmentPresenter
+    lateinit var presenter: SearchResultsPresenter
     private lateinit var linearLayoutManager: GridLayoutManager
     private lateinit var adapter: MovieListAdapter
+    var query = ""
     private var page: Int = 1
-    private var genreId: Long = 0
-    private lateinit var disposable: Disposable
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_search_results)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        activity!!.injector
-            .plusMovie(MovieModule(this))
+        injector
+            .plusSearchResults(SearchResultsModule(this))
             .inject(this)
 
-        return inflater.inflate(R.layout.movie_fragment, container, false)
+        handleIntent(intent)
+        setupRecyclerview(this)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setupRecyclerview(this.context!!)
-        genreId = this.arguments!!.getLong("id")
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.options_menu, menu)
 
-        fragmentPresenter.fetchMovies(page, genreId)
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        (menu.findItem(R.id.search).actionView as SearchView).apply {
+            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+        }
 
-        fragmentPresenter.observeMoviesByGenreId(genreId).observe(this, Observer {
-            adapter.submitList(it)
-        })
+        return true
+    }
 
-        swipeLayout.setOnRefreshListener {
-            fragmentPresenter.fetchMovies(page, genreId)
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+
+        if (Intent.ACTION_SEARCH == intent.action) {
+            query = intent.getStringExtra(SearchManager.QUERY)
+            presenter.fetchMoviesByText(page, query)
         }
     }
 
@@ -70,7 +81,7 @@ class MovieFragment : Fragment(), MovieView {
                 val lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
                 val isNearEnd = total - 1 == lastVisibleItem
                 if (isNearEnd && !swipeLayout.isRefreshing && page != -1) {
-                    fragmentPresenter.fetchMovies(page, genreId)
+                    presenter.fetchMoviesByText(page, query)
                 }
             }
         })
@@ -78,6 +89,7 @@ class MovieFragment : Fragment(), MovieView {
 
     override fun updatePage(it: ResponseMovies) {
         adapter.submitList(it.results)
+
         if (it.totalPages == page) {
             page = -1
         } else {
@@ -86,7 +98,7 @@ class MovieFragment : Fragment(), MovieView {
     }
 
     override fun showError() {
-        Toast.makeText(context, getString(R.string.error), Toast.LENGTH_LONG).show()
+        Toast.makeText(this, getString(R.string.error), Toast.LENGTH_LONG).show()
     }
 
     override fun showLoading() {
@@ -98,3 +110,6 @@ class MovieFragment : Fragment(), MovieView {
     }
 
 }
+
+//https://api.themoviedb.org/3/search/movies?page=1&query=mad&api_key=d71ff64de15d4ed68bd780ce30e5b24c&language=pt-BR
+//https://api.themoviedb.org/3/search/movie?api_key=d71ff64de15d4ed68bd780ce30e5b24c&language=en-US&query=mad&page=1
