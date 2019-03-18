@@ -1,9 +1,10 @@
-package xyz.manolos.cubos
+package xyz.manolos.cubos.movie
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
+import xyz.manolos.cubos.R
 
-class MainActivity : AppCompatActivity() {
+class MovieActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
