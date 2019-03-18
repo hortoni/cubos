@@ -4,4 +4,5 @@
     <string name="drama">Drama</string>
     <string name="fantasia">Fantasia</string>
     <string name="ficcao">Ficção</string>
+    <string name="error">Sem conexão com a internet.</string>
 </resources>

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import xyz.manolos.cubos.R
 
+
 class MovieActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -12,8 +13,7 @@ class MovieActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val fragmentAdapter = MoviePagerAdapter(supportFragmentManager)
-        movie_viewpager.adapter = fragmentAdapter
-
-        movie_tabs.setupWithViewPager(movie_viewpager)
+        movieViewPager.adapter = fragmentAdapter
+        movieTabs.setupWithViewPager(movieViewPager)
     }
 }

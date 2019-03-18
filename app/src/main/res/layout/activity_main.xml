@@ -8,7 +8,7 @@
         tools:context=".movie.MovieActivity">
 
     <com.google.android.material.tabs.TabLayout
-            android:id="@+id/movie_tabs"
+            android:id="@+id/movieTabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -18,9 +18,9 @@
             app:tabMode="fixed" />
 
     <androidx.viewpager.widget.ViewPager
-            android:id="@+id/movie_viewpager"
+            android:id="@+id/movieViewPager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/movie_tabs"/>
+            app:layout_constraintTop_toBottomOf="@+id/movieTabs"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
