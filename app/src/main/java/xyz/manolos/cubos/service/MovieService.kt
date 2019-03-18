@@ -9,9 +9,9 @@ import xyz.manolos.cubos.model.ResponseMovies
 
 interface MovieService {
 
-    @GET("movie/popular")
-    fun fetchMovies(@Query("page") page: Int): Single<ResponseMovies>
-
     @GET("genre/movie/list")
     fun fetchGenres(): Single<ResponseGenres>
+
+    @GET("discover/movie")
+    fun fetchMoviesByGenreId(@Query("page") page: Int, @Query("with_genres") genreId: Int): Single<ResponseMovies>
 }
