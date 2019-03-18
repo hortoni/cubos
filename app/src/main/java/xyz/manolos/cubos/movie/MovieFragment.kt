@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.movie_fragment.*
 import xyz.manolos.cubos.R
+import xyz.manolos.cubos.injector
 import xyz.manolos.cubos.model.ResponseMovies
 import javax.inject.Inject
 
@@ -24,18 +25,22 @@ interface MovieView {
 class MovieFragment: Fragment(), MovieView {
 
     @Inject
-    private lateinit var presenter: MoviePresenter
+    lateinit var presenter: MoviePresenter
     private lateinit var linearLayoutManager: GridLayoutManager
     private lateinit var adapter: MovieListAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        activity!!.injector
+            .plusMovie(MovieModule(this))
+            .inject(this)
+
         return inflater.inflate(R.layout.movie_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupRecyclerview(this.context!!)
 
-        presenter.fetchMovies(1, 18)
+        presenter.fetchMovies(1, this.arguments!!.getInt("id"))
 
     }
 
