@@ -10,9 +10,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.movie_fragment.*
+import kotlinx.android.synthetic.main.activity_search_results.*
 import xyz.manolos.cubos.R
 import xyz.manolos.cubos.injector
+import xyz.manolos.cubos.model.Movie
 import xyz.manolos.cubos.model.ResponseMovies
 import xyz.manolos.cubos.movie.MovieListAdapter
 import javax.inject.Inject
@@ -20,6 +21,7 @@ import javax.inject.Inject
 
 interface SearchResultsView {
     fun updatePage(it: ResponseMovies)
+    fun resetPage(it: ResponseMovies)
     fun showError()
     fun showLoading()
     fun hideLoading()
@@ -31,7 +33,7 @@ class SearchResultsActivity : AppCompatActivity(), SearchResultsView{
     lateinit var presenter: SearchResultsPresenter
     private lateinit var linearLayoutManager: GridLayoutManager
     private lateinit var adapter: MovieListAdapter
-    var query = ""
+    var queryText = ""
     private var page: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,17 +46,45 @@ class SearchResultsActivity : AppCompatActivity(), SearchResultsView{
 
         handleIntent(intent)
         setupRecyclerview(this)
+
+        swipeSearchResultsLayout.setOnRefreshListener {
+            presenter.fetchMoviesByText(page, queryText)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.options_menu, menu)
 
-        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        (menu.findItem(R.id.search).actionView as SearchView).apply {
-            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+        val searchItem = menu.findItem(R.id.search)
+
+        if (searchItem != null) {
+            val searchView = searchItem.actionView as SearchView
+
+            searchView.setQuery(queryText, true)
+            searchView.isIconified = false
+            searchView.clearFocus()
+
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    presenter.fetchMoviesByText(1, query!!)
+                    searchView.clearFocus()
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    return false
+                }
+            })
         }
 
+
+
         return true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        overridePendingTransition(0,0)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -65,30 +95,34 @@ class SearchResultsActivity : AppCompatActivity(), SearchResultsView{
     private fun handleIntent(intent: Intent) {
 
         if (Intent.ACTION_SEARCH == intent.action) {
-            query = intent.getStringExtra(SearchManager.QUERY)
-            presenter.fetchMoviesByText(page, query)
+            queryText = intent.getStringExtra(SearchManager.QUERY)
+            presenter.fetchMoviesByText(page, queryText)
         }
     }
 
     private fun setupRecyclerview(context: Context) {
         linearLayoutManager = GridLayoutManager(context, 2)
-        moviesList.layoutManager = linearLayoutManager
+        moviesSearchResultsList.layoutManager = linearLayoutManager
         adapter = MovieListAdapter(context)
-        moviesList.adapter = adapter
-        moviesList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        moviesSearchResultsList.adapter = adapter
+        moviesSearchResultsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val total = linearLayoutManager.itemCount
                 val lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
                 val isNearEnd = total - 1 == lastVisibleItem
-                if (isNearEnd && !swipeLayout.isRefreshing && page != -1) {
-                    presenter.fetchMoviesByText(page, query)
+                if (isNearEnd && !swipeSearchResultsLayout.isRefreshing && page != -1) {
+                    presenter.fetchNextPage(page)
                 }
             }
         })
     }
 
     override fun updatePage(it: ResponseMovies) {
-        adapter.submitList(it.results)
+        if (adapter.currentList.isEmpty()) {
+            adapter.submitList(it.results)
+        } else {
+            adapter.submitList(getListFromLists(adapter.currentList, it.results))
+        }
 
         if (it.totalPages == page) {
             page = -1
@@ -97,19 +131,29 @@ class SearchResultsActivity : AppCompatActivity(), SearchResultsView{
         }
     }
 
+    override fun resetPage(it: ResponseMovies) {
+        page = it.page + 1
+        adapter.submitList(it.results)
+
+    }
+
     override fun showError() {
         Toast.makeText(this, getString(R.string.error), Toast.LENGTH_LONG).show()
     }
 
     override fun showLoading() {
-        swipeLayout.isRefreshing = true
+        swipeSearchResultsLayout.isRefreshing = true
     }
 
     override fun hideLoading() {
-        swipeLayout.isRefreshing = false
+        swipeSearchResultsLayout.isRefreshing = false
+    }
+
+    fun getListFromLists(list1: List<Movie>, list2: List<Movie>) : List<Movie> {
+        val list = ArrayList<Movie>()
+        list.addAll(list1)
+        list.addAll(list2)
+        return list
     }
 
 }
-
-//https://api.themoviedb.org/3/search/movies?page=1&query=mad&api_key=d71ff64de15d4ed68bd780ce30e5b24c&language=pt-BR
-//https://api.themoviedb.org/3/search/movie?api_key=d71ff64de15d4ed68bd780ce30e5b24c&language=en-US&query=mad&page=1

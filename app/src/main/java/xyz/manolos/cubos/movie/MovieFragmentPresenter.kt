@@ -24,6 +24,7 @@ class MovieFragmentPresenter @Inject constructor(
     private val disposables = CompositeDisposable()
 
     fun fetchMovies(page: Int, genreId: Long) {
+        view.showLoading()
         movieService.fetchMoviesByGenreId(page, genreId)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(

@@ -33,4 +33,14 @@ class MovieActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onPause() {
+        super.onPause()
+        overridePendingTransition(0,0)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        invalidateOptionsMenu()
+    }
+
 }

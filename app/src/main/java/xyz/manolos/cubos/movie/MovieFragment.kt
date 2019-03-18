@@ -52,6 +52,7 @@ class MovieFragment : Fragment(), MovieView {
 
         fragmentPresenter.observeMoviesByGenreId(genreId).observe(this, Observer {
             adapter.submitList(it)
+            moviesList.smoothScrollToPosition(0)
         })
 
         swipeLayout.setOnRefreshListener {

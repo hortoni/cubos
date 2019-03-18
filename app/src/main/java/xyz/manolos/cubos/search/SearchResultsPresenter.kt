@@ -13,9 +13,27 @@ class SearchResultsPresenter @Inject constructor(
     private val movieService: MovieService
 ) {
 
+    private var query: String = ""
     private val disposables = CompositeDisposable()
 
     fun fetchMoviesByText(page: Int, query: String) {
+        view.showLoading()
+        this.query = query
+        movieService.fetchMoviesByQuery(page, query)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onSuccess = {
+                    resetPageAndHideLoading(it)
+                },
+                onError = {
+                    showErrorAndHideLoading()
+                }
+            )
+            .addTo(disposables)
+    }
+
+    fun fetchNextPage(page: Int) {
+        view.showLoading()
         movieService.fetchMoviesByQuery(page, query)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
@@ -31,6 +49,11 @@ class SearchResultsPresenter @Inject constructor(
 
     private fun updatePageAndHideLoading(it: ResponseMovies) {
         view.updatePage(it)
+        view.hideLoading()
+    }
+
+    private fun resetPageAndHideLoading(it: ResponseMovies) {
+        view.resetPage(it)
         view.hideLoading()
     }
 
