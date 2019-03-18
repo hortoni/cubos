@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.movie_fragment.*
 import xyz.manolos.cubos.R
 import xyz.manolos.cubos.injector
@@ -16,7 +17,7 @@ import javax.inject.Inject
 
 
 interface MovieView {
-    fun update(it: ResponseMovies)
+    fun updatePage(it: ResponseMovies)
     fun showError()
     fun showLoading()
     fun hideLoading()
@@ -28,6 +29,8 @@ class MovieFragment: Fragment(), MovieView {
     lateinit var presenter: MoviePresenter
     private lateinit var linearLayoutManager: GridLayoutManager
     private lateinit var adapter: MovieListAdapter
+    private var page: Int = 1
+    private var genreId = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity!!.injector
@@ -39,9 +42,8 @@ class MovieFragment: Fragment(), MovieView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupRecyclerview(this.context!!)
-
-        presenter.fetchMovies(1, this.arguments!!.getInt("id"))
-
+        genreId = this.arguments!!.getInt("id")
+        presenter.fetchMovies(1, genreId)
     }
 
     private fun setupRecyclerview(context: Context) {
@@ -49,11 +51,27 @@ class MovieFragment: Fragment(), MovieView {
         moviesList.layoutManager = linearLayoutManager
         adapter = MovieListAdapter(context)
         moviesList.adapter = adapter
+        moviesList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val total = linearLayoutManager.itemCount
+                val lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
+                val isNearEnd = total - 1 == lastVisibleItem
+                if (isNearEnd && !swipeLayout.isRefreshing && page != -1)  {
+                    presenter.fetchMovies(page, genreId)
+
+                }
+            }
+        })
 
     }
 
-    override fun update(it: ResponseMovies) {
+    override fun updatePage(it: ResponseMovies) {
         adapter.submitList(it.results)
+        if (it.totalPages == page) {
+            page = -1
+        } else {
+            page ++
+        }
     }
 
     override fun showError() {

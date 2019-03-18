@@ -8,7 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import xyz.manolos.cubos.service.ApiKeyAndLanguageInterceptor
-import xyz.manolos.inmovies.service.MovieService
+import xyz.manolos.cubos.service.MovieService
 import javax.inject.Singleton
 
 @Module

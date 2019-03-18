@@ -33,7 +33,7 @@ class MoviePagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
-            0 ->   "Ação"
+            0 ->  "Ação"
             1 -> "Drama"
             2 -> "Fantasia"
             else -> {

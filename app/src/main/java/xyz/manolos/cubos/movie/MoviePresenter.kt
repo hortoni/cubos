@@ -4,7 +4,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
-import xyz.manolos.inmovies.service.MovieService
+import xyz.manolos.cubos.model.ResponseMovies
+import xyz.manolos.cubos.service.MovieService
 import javax.inject.Inject
 
 class MoviePresenter @Inject constructor(
@@ -19,12 +20,22 @@ class MoviePresenter @Inject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onSuccess = {
-                    view.update(it)
+                    updatePageAndHideLoading(it)
                 },
                 onError = {
-                    view.showError()
+                    showErrorAndHideLoading()
                 }
             )
             .addTo(disposables)
+    }
+
+    private fun updatePageAndHideLoading(it: ResponseMovies) {
+        view.updatePage(it)
+        view.hideLoading()
+    }
+
+    private fun showErrorAndHideLoading() {
+        view.showError()
+        view.hideLoading()
     }
 }
