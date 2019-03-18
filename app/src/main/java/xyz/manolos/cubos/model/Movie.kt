@@ -21,7 +21,6 @@ data class Movie @JvmOverloads constructor(
     @Json(name = "backdrop_path") val backdropPath: String?,
     val overview: String?,
     @Json(name = "release_date") val releaseDate: String?,
-    @Json(name = "genre_ids") @Ignore var genreIds: List<Long> = emptyList(),
-    val genreId: Int?
+    @Json(name = "genre_ids") @Ignore var genreIds: List<Long> = emptyList()
 ) : Parcelable
 
